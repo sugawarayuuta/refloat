@@ -1,6 +1,8 @@
 ## Refloat 
 
-Float parser that sacrifices nothing
+[![Go Reference](https://pkg.go.dev/badge/github.com/sugawarayuuta/refloat.svg)](https://pkg.go.dev/github.com/sugawarayuuta/refloat)
+
+Float parser that sacrifices nothing.
 
 ![gopher.png](./gopher.png)
 
@@ -40,8 +42,14 @@ strconv: 0,65
 refloat: 0,49
 ```
 
+### Articles
+
+There are articles written in [English](https://refloat.dev/) and [Japanese](https://zenn.dev/sugawarayuuta/articles/a1e02476fd34d5).
+
 ### Thank you
 
 The icon above is from [gopher-stickers](https://github.com/tenntenn/gopher-stickers) by Ueda Takuya.
 
-[Awesome talk](https://youtu.be/AVXgvlMeIm4?si=kUmg4fyINKRQLYEu) and [inspirational algorithm](https://github.com/lemire/fast_double_parser) by Daniel Lemire
+[Awesome talk](https://youtu.be/AVXgvlMeIm4?si=kUmg4fyINKRQLYEu) and [inspirational algorithm](https://github.com/lemire/fast_double_parser) by Daniel Lemire.
+
+[Sollya is used](https://sollya.org/) for precomputing the polynomial for approximations.
