@@ -163,10 +163,11 @@ func hexParseFloat(num string, extend int) (uint64, int, error) {
 		bias = 127
 	}
 
-	// use Len64 so we have no overflows.
 	log := bits.Len64(mant) - prec - 1 - 1
 	exp += log + bias + prec + 1
 	// when we right shift, always check for truncated bits.
+	// note: mant<<(width-log) != 0 is a wrong implementation,
+	// especially for width == 32.
 	if log > 0 {
 		if mant&(1<<log-1) != 0 {
 			trunc = true
@@ -201,7 +202,7 @@ func hexParseFloat(num string, extend int) (uint64, int, error) {
 		exp++
 	}
 	// handle carries from rounding.
-	// mant >> 53 becomes 1 when it overflows.
+	// mant >> (prec+1) becomes 1 when it overflows.
 	carry := mant >> (prec + 1)
 	mant >>= carry
 	exp += int(carry)

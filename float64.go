@@ -6,6 +6,8 @@ import (
 )
 
 var (
+	// powers of 10 can be represented exactly by binary64, ignoring
+	// all the trailing zeros.
 	pow10float64 = [...]float64{
 		1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09,
 		1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
@@ -31,6 +33,7 @@ func parseFloat64(num string) (float64, int, error) {
 		sign = 1
 	}
 
+	// ORing 0x20 gives lowercased characters.
 	if offset >= len(num) {
 		return 0, 0, errorSyntax(fnc, num)
 	} else if num[offset]|0x20 == 'i' {
@@ -38,6 +41,7 @@ func parseFloat64(num string) (float64, int, error) {
 		if comm >= 8 {
 			return math.Inf(-sign), offset + 8, nil
 		}
+		// don't consume something like "infin" more than "inf".
 		if comm >= 3 {
 			return math.Inf(-sign), offset + 3, nil
 		}
@@ -56,6 +60,8 @@ func parseFloat64(num string) (float64, int, error) {
 		return math.Float64frombits(u64), offset, err
 	}
 
+	// the limit of being able to do
+	// mant = mant*10 + 9.
 	const limit = 0x1999999999999999
 	var point, edigit, line bool
 	for ; offset < len(num); offset++ {
@@ -117,8 +123,8 @@ func parseFloat64(num string) (float64, int, error) {
 			if mant == 0 {
 				continue
 			}
+			// definitely an overflow
 			if esign && exp10-shift < -limit || !esign && exp10+shift > limit {
-				// definitely an overflow
 				continue
 			}
 			shift = shift*10 + int(char)
@@ -150,6 +156,9 @@ func parseFloat64(num string) (float64, int, error) {
 
 	abs := max(exp10, -exp10)
 	if abs <= 22 && mant < 1<<53 {
+		// even if it can't represent the number exactly,
+		// as long as it's under these conditions,
+		// it returns the correctly rounded values.
 		f64 := float64(mant)
 		if exp10 > 0 {
 			f64 *= pow10float64[abs]
@@ -187,6 +196,8 @@ func parseFloat64(num string) (float64, int, error) {
 	lom := mant << zero
 	him := lom
 	if mant >= limit {
+		// mant >= limit when it couldn't represent
+		// the mantissa exactly. create an upper bound.
 		him += 1 << zero
 	}
 	exp -= int(zero)
@@ -215,6 +226,8 @@ func parseFloat64(num string) (float64, int, error) {
 	if flag == 0 {
 		los, loc := bits.Add64(lop, lom, 0)
 		his, hic := bits.Add64(hip, him, 0)
+		// loc and hic are ORed to not lose bits.
+		// always prioritize the one with a carry.
 		lop = los>>(loc|hic) | loc<<63
 		hip = his>>(loc|hic) | hic<<63
 		exp += int(loc | hic)
@@ -223,6 +236,9 @@ func parseFloat64(num string) (float64, int, error) {
 	const bias = 1023
 	const prec = 52
 
+	// lop and hip are NOT-ANDed to not lose bits,
+	// just like the OR in the above block.
+	// always prioritize the one with non-zero MSB.
 	flip := ^lop & ^hip >> 63
 	lop <<= flip
 	hip <<= flip
@@ -247,6 +263,8 @@ func parseFloat64(num string) (float64, int, error) {
 	lop >>= carry
 	exp += int(carry)
 	if lor <= 1<<63 && hir > 1<<63 || hip != lop {
+		// the former condition ensures there is no possibilities
+		// of ending up in the "ties".
 		u64, offset, err := bigParseFloat(num, 1)
 		return math.Float64frombits(u64), offset, err
 	}

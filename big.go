@@ -98,6 +98,7 @@ func bigParseFloat(num string, extend int) (uint64, int, error) {
 	exp := exp10
 	abs := big.NewInt(0)
 	abs.SetUint64(uint64(max(exp10, -exp10)))
+	// in .Exp(), If m == nil or m == 0, z = x**y.
 	temp.Exp(fiv, abs, nil)
 	var trunc bool
 	if exp10 >= 0 {
@@ -116,7 +117,7 @@ func bigParseFloat(num string, extend int) (uint64, int, error) {
 			exp -= log
 		}
 		mant.DivMod(&mant, &temp, &rem)
-		trunc = rem.Sign() != 0
+		trunc = rem.Sign() != 0 // .Sign() == 0 only for 0.
 	}
 
 	var prec, bias int
