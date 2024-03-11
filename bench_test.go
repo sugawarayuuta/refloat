@@ -153,5 +153,27 @@ func BenchmarkParseFloat64Special(b *testing.B) {
 			{inp: "-inf", out: math.Inf(-1)},
 		})
 	})
+}
 
+func BenchmarkParseFloat32Special(b *testing.B) {
+	b.Run("strconv", func(b *testing.B) {
+		benchmarkParseFloat32(b, strconv.ParseFloat, []float32String{
+			{inp: "NaN", out: float32(math.NaN())},
+			{inp: "nan", out: float32(math.NaN())},
+			{inp: "Inf", out: float32(math.Inf(1))},
+			{inp: "inf", out: float32(math.Inf(1))},
+			{inp: "+Infinity", out: float32(math.Inf(1))},
+			{inp: "-inf", out: float32(math.Inf(-1))},
+		})
+	})
+	b.Run("refloat", func(b *testing.B) {
+		benchmarkParseFloat32(b, refloat.ParseFloat, []float32String{
+			{inp: "NaN", out: float32(math.NaN())},
+			{inp: "nan", out: float32(math.NaN())},
+			{inp: "Inf", out: float32(math.Inf(1))},
+			{inp: "inf", out: float32(math.Inf(1))},
+			{inp: "+Infinity", out: float32(math.Inf(1))},
+			{inp: "-inf", out: float32(math.Inf(-1))},
+		})
+	})
 }
