@@ -36,18 +36,22 @@ func parseFloat32(num string) (float32, int, error) {
 
 	if offset >= len(num) {
 		return 0, 0, errorSyntax(fnc, num)
-	} else if num[offset]|0x20 == 'i' {
-		comm := common(num[offset:], "infinity")
-		if comm >= 8 {
+	}
+
+	if num[offset]|0x20 == 'i' {
+		comm := common(num[offset+1:], "nfinity")
+		if comm == 7 {
 			return math.Float32frombits(inf32 | uint32(sign)<<31), offset + 8, nil
 		}
-		if comm >= 3 {
+		if comm == 2 {
 			return math.Float32frombits(inf32 | uint32(sign)<<31), offset + 3, nil
 		}
 		return 0, 0, errorSyntax(fnc, num)
-	} else if num[offset]|0x20 == 'n' {
-		comm := common(num[offset:], "nan")
-		if comm >= 3 && offset == 0 {
+	}
+
+	if num[offset]|0x20 == 'n' {
+		comm := common(num[offset+1:], "an")
+		if comm == 2 && offset == 0 {
 			return math.Float32frombits(nan32), offset + 3, nil
 		}
 		return 0, 0, errorSyntax(fnc, num)

@@ -33,23 +33,26 @@ func parseFloat64(num string) (float64, int, error) {
 		sign = 1
 	}
 
-	// ORing 0x20 gives lowercased characters.
 	if offset >= len(num) {
 		return 0, 0, errorSyntax(fnc, num)
-	} else if num[offset]|0x20 == 'i' {
-		comm := common(num[offset:], "infinity")
-		if comm >= 8 {
+	}
+	// ORing 0x20 gives lowercased characters.
+	if num[offset]|0x20 == 'i' {
+		comm := common(num[offset+1:], "nfinity")
+		if comm == 7 {
 			return math.Inf(-sign), offset + 8, nil
 		}
 		// don't consume something like "infin" more than "inf".
-		if comm >= 3 {
+		if comm == 2 {
 			return math.Inf(-sign), offset + 3, nil
 		}
 		return 0, 0, errorSyntax(fnc, num)
-	} else if num[offset]|0x20 == 'n' {
-		comm := common(num[offset:], "nan")
+	}
+
+	if num[offset]|0x20 == 'n' {
+		comm := common(num[offset+1:], "an")
 		// NaN cannot be signed.
-		if comm >= 3 && offset == 0 {
+		if comm == 2 && offset == 0 {
 			return math.NaN(), offset + 3, nil
 		}
 		return 0, 0, errorSyntax(fnc, num)

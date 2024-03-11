@@ -113,6 +113,9 @@ var atoftests = []atofTest{
 	{"nan", "NaN", nil},
 	{"NaN", "NaN", nil},
 	{"NAN", "NaN", nil},
+	{"-nan", "0", ErrSyntax},
+	{"+nan", "0", ErrSyntax},
+	{"NaNny", "0", ErrSyntax},
 
 	// Infs
 	{"inf", "+Inf", nil},
@@ -121,6 +124,8 @@ var atoftests = []atofTest{
 	{"-Infinity", "-Inf", nil},
 	{"+INFINITY", "+Inf", nil},
 	{"Infinity", "+Inf", nil},
+	{"-infini", "0", ErrSyntax},
+	{"infinityy", "0", ErrSyntax},
 
 	// largest float64
 	{"1.7976931348623157e308", "1.7976931348623157e+308", nil},
