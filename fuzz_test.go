@@ -9,11 +9,20 @@ import (
 )
 
 func Fuzz(f *testing.F) {
+	if testing.Short() {
+		f.SkipNow()
+	}
+	// discuss: is there more appropriate approaches for seed corpus?
+	// currently, it tries to mutate valid seeds into (possibly) invalid ones.
 	for _, test := range atoftests {
-		f.Add(test.in, 64)
+		if test.err == nil {
+			f.Add(test.in, 64)
+		}
 	}
 	for _, test := range atof32tests {
-		f.Add(test.in, 32)
+		if test.err == nil {
+			f.Add(test.in, 32)
+		}
 	}
 	f.Fuzz(func(t *testing.T, num string, size int) {
 		fstd, estd := strconv.ParseFloat(num, size)
