@@ -4,9 +4,9 @@
 package refloat_test
 
 import (
+	"errors"
 	"math"
 	"math/rand"
-	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -452,20 +452,21 @@ func initAtof() {
 }
 
 func initAtofOnce() {
-	// The atof routines return NumErrors wrapping
-	// the error and the string. Convert the table above.
-	for i := range atoftests {
-		test := &atoftests[i]
-		if test.err != nil {
-			test.err = &NumError{"ParseFloat", test.in, test.err}
-		}
-	}
-	for i := range atof32tests {
-		test := &atof32tests[i]
-		if test.err != nil {
-			test.err = &NumError{"ParseFloat", test.in, test.err}
-		}
-	}
+	// below code is not needed, because now the tests use errors.Is.
+	// the old comment: "The atof routines return NumErrors wrapping
+	// the error and the string. Convert the table above."
+	// for i := range atoftests {
+	// 	test := &atoftests[i]
+	// 	if test.err != nil {
+	// 		test.err = &NumError{"ParseFloat", test.in, test.err}
+	// 	}
+	// }
+	// for i := range atof32tests {
+	// 	test := &atof32tests[i]
+	// 	if test.err != nil {
+	// 		test.err = &NumError{"ParseFloat", test.in, test.err}
+	// 	}
+	// }
 
 	// Generate random inputs for tests and benchmarks
 	if testing.Short() {
@@ -516,14 +517,14 @@ func initAtofOnce() {
 // 	}
 // }
 
-func testAtof(t *testing.T, opt bool) {
+func testAtof(t *testing.T /*, opt bool*/) {
 	initAtof()
 	// oldopt := SetOptimize(opt)
 	for i := 0; i < len(atoftests); i++ {
 		test := &atoftests[i]
 		out, err := ParseFloat(test.in, 64)
 		outs := strconv.FormatFloat(out, 'g', -1, 64)
-		if outs != test.out || !reflect.DeepEqual(err, test.err) {
+		if outs != test.out || !errors.Is(err, test.err) {
 			t.Errorf("ParseFloat(%v, 64) = %v, %v want %v, %v",
 				test.in, out, err, test.out, test.err)
 		}
@@ -536,7 +537,7 @@ func testAtof(t *testing.T, opt bool) {
 				continue
 			}
 			outs := strconv.FormatFloat(float64(out32), 'g', -1, 32)
-			if outs != test.out || !reflect.DeepEqual(err, test.err) {
+			if outs != test.out || !errors.Is(err, test.err) {
 				t.Errorf("ParseFloat(%v, 32) = %v, %v want %v, %v  # %v",
 					test.in, out32, err, test.out, test.err, out)
 			}
@@ -550,7 +551,7 @@ func testAtof(t *testing.T, opt bool) {
 			continue
 		}
 		outs := strconv.FormatFloat(float64(out32), 'g', -1, 32)
-		if outs != test.out || !reflect.DeepEqual(err, test.err) {
+		if outs != test.out || !errors.Is(err, test.err) {
 			t.Errorf("ParseFloat(%v, 32) = %v, %v want %v, %v  # %v",
 				test.in, out32, err, test.out, test.err, out)
 		}
@@ -558,9 +559,9 @@ func testAtof(t *testing.T, opt bool) {
 	// SetOptimize(oldopt)
 }
 
-func TestAtof(t *testing.T) { testAtof(t, true) }
+func TestAtof(t *testing.T) { testAtof(t /*, true*/) }
 
-func TestAtofSlow(t *testing.T) { testAtof(t, false) }
+// func TestAtofSlow(t *testing.T) { testAtof(t /*, false*/) }
 
 func TestAtofRandom(t *testing.T) {
 	initAtof()
