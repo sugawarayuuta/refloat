@@ -42,7 +42,6 @@ func parseFloat64(num string) (float64, int, error) {
 		if comm == 7 {
 			return math.Inf(-sign), offset + 8, nil
 		}
-		// don't consume something like "infin" more than "inf".
 		if comm == 2 {
 			return math.Inf(-sign), offset + 3, nil
 		}
@@ -66,7 +65,7 @@ func parseFloat64(num string) (float64, int, error) {
 	// the limit of being able to do
 	// mant = mant*10 + 9.
 	const limit = 0x1999999999999999
-	var point, edigit, line bool
+	var point, digit, line bool
 	for ; offset < len(num); offset++ {
 		char := num[offset]
 		if char == '.' && !point {
@@ -81,7 +80,7 @@ func parseFloat64(num string) (float64, int, error) {
 		if char > '9'-'0' {
 			break
 		}
-		edigit = true
+		digit = true
 		if point {
 			exp10--
 		}
@@ -92,7 +91,7 @@ func parseFloat64(num string) (float64, int, error) {
 		mant = mant*10 + uint64(char)
 	}
 
-	if !edigit {
+	if !digit {
 		return 0, 0, errorSyntax(fnc, num)
 	}
 
